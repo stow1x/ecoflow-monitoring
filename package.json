@@ -18,6 +18,8 @@
   },
   "scripts": {
     "start": "node src/index.ts",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
     "test": "node --test",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",

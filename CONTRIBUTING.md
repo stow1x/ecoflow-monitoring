@@ -24,7 +24,8 @@ curl localhost:9101/metrics
 Or the whole stack, including Prometheus and Grafana:
 
 ```bash
-docker compose up -d --build
+pnpm run docker:up      # docker compose up -d --build
+pnpm run docker:down    # docker compose down
 ```
 
 ## Pull requests

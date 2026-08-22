@@ -221,9 +221,20 @@ real captured values, it belongs in `DISPUTED_FIELDS` with the reason, not in `F
 ```bash
 pnpm install
 pnpm run typecheck    # tsc --noEmit; there is no build step
+pnpm run lint         # eslint with type-aware rules
 pnpm test             # node --test, 76 tests
+pnpm run check        # all three, the same gate CI applies
+
+pnpm run docker:up    # build and start exporter + Prometheus + Grafana
+pnpm run docker:down  # stop them, keeping the metric history
+
 pnpm run capture      # record a scrubbed NDJSON trace from your own devices
 ```
+
+`docker:up` always rebuilds. Compose happily reuses a stale image otherwise, which produces the
+worst kind of confusion: source that no longer matches the container you are looking at.
+`docker:down` leaves the named volumes alone, so Prometheus keeps its history; add `-v` by hand
+when you actually want a clean slate.
 
 Node 24 runs the `.ts` sources directly through type stripping, so the container ships the sources
 and no compiled output. `erasableSyntaxOnly` keeps them strippable.
