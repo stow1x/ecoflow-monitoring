@@ -31,3 +31,8 @@ updates:
       interval: weekly
     commit-message:
       prefix: "build"
+    ignore:
+      # The image must stay on a Node LTS line: the exporter ships TypeScript
+      # sources and relies on type stripping being stable, not experimental.
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
