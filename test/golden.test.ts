@@ -30,9 +30,8 @@ async function renderExposition(): Promise<string> {
   const exposition = await metrics.registry.metrics();
   return exposition
     .split("\n")
-    .filter((line) => !line.startsWith("ecoflow_exporter_") && !line.includes("ecoflow_exporter_"))
-    .join("\n")
-    .trimEnd();
+    .filter((line) => line.trim() !== "" && !line.includes("ecoflow_exporter_"))
+    .join("\n");
 }
 
 test("the exposition rendered from the captured fixtures matches the golden file", async () => {

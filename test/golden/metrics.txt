@@ -1,204 +1,141 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # HELP ecoflow_battery_soc_percent Battery state of charge in percent.
 # TYPE ecoflow_battery_soc_percent gauge
 ecoflow_battery_soc_percent{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 100
 ecoflow_battery_soc_percent{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 88.5
-
 # HELP ecoflow_battery_soh_percent Battery state of health in percent.
 # TYPE ecoflow_battery_soh_percent gauge
 ecoflow_battery_soh_percent{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 99
 ecoflow_battery_soh_percent{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 98
-
 # HELP ecoflow_battery_cycles Battery charge cycles counted by the BMS.
 # TYPE ecoflow_battery_cycles gauge
 ecoflow_battery_cycles{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 79
 ecoflow_battery_cycles{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 222
-
 # HELP ecoflow_battery_temperature_celsius Battery pack temperature in degrees Celsius.
 # TYPE ecoflow_battery_temperature_celsius gauge
 ecoflow_battery_temperature_celsius{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 32
 ecoflow_battery_temperature_celsius{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 32
-
 # HELP ecoflow_battery_cell_temperature_min_celsius Coldest battery cell temperature in degrees Celsius.
 # TYPE ecoflow_battery_cell_temperature_min_celsius gauge
 ecoflow_battery_cell_temperature_min_celsius{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 32
 ecoflow_battery_cell_temperature_min_celsius{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 32
-
 # HELP ecoflow_battery_cell_temperature_max_celsius Hottest battery cell temperature in degrees Celsius.
 # TYPE ecoflow_battery_cell_temperature_max_celsius gauge
 ecoflow_battery_cell_temperature_max_celsius{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 32
 ecoflow_battery_cell_temperature_max_celsius{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 32
-
 # HELP ecoflow_battery_mos_temperature_min_celsius Coldest BMS MOSFET temperature in degrees Celsius.
 # TYPE ecoflow_battery_mos_temperature_min_celsius gauge
 ecoflow_battery_mos_temperature_min_celsius{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 34
 ecoflow_battery_mos_temperature_min_celsius{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 32
-
 # HELP ecoflow_battery_mos_temperature_max_celsius Hottest BMS MOSFET temperature in degrees Celsius.
 # TYPE ecoflow_battery_mos_temperature_max_celsius gauge
 ecoflow_battery_mos_temperature_max_celsius{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 34
 ecoflow_battery_mos_temperature_max_celsius{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 32
-
 # HELP ecoflow_battery_voltage_volts Battery pack voltage in volts.
 # TYPE ecoflow_battery_voltage_volts gauge
 ecoflow_battery_voltage_volts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 55.028
 ecoflow_battery_voltage_volts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 13
-
 # HELP ecoflow_battery_current_amperes Battery pack current in amperes, positive while charging.
 # TYPE ecoflow_battery_current_amperes gauge
 ecoflow_battery_current_amperes{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_battery_current_amperes{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_battery_cell_voltage_min_volts Lowest battery cell voltage in volts.
 # TYPE ecoflow_battery_cell_voltage_min_volts gauge
 ecoflow_battery_cell_voltage_min_volts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 3.341
 ecoflow_battery_cell_voltage_min_volts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 3.293
-
 # HELP ecoflow_battery_cell_voltage_max_volts Highest battery cell voltage in volts.
 # TYPE ecoflow_battery_cell_voltage_max_volts gauge
 ecoflow_battery_cell_voltage_max_volts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 3.463
 ecoflow_battery_cell_voltage_max_volts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 3.293
-
 # HELP ecoflow_battery_cell_voltage_spread_volts Difference between the highest and lowest battery cell voltage in volts.
 # TYPE ecoflow_battery_cell_voltage_spread_volts gauge
 ecoflow_battery_cell_voltage_spread_volts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0.122
-
 # HELP ecoflow_battery_design_capacity_amp_hours Battery design capacity in ampere-hours.
 # TYPE ecoflow_battery_design_capacity_amp_hours gauge
 ecoflow_battery_design_capacity_amp_hours{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 30
 ecoflow_battery_design_capacity_amp_hours{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 20
-
 # HELP ecoflow_battery_full_capacity_amp_hours Battery full-charge capacity in ampere-hours.
 # TYPE ecoflow_battery_full_capacity_amp_hours gauge
 ecoflow_battery_full_capacity_amp_hours{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 29.7
 ecoflow_battery_full_capacity_amp_hours{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 17.564
-
 # HELP ecoflow_battery_remaining_capacity_amp_hours Battery remaining capacity in ampere-hours.
 # TYPE ecoflow_battery_remaining_capacity_amp_hours gauge
 ecoflow_battery_remaining_capacity_amp_hours{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 29.282
 ecoflow_battery_remaining_capacity_amp_hours{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 15.532
-
 # HELP ecoflow_battery_charge_limit_percent Configured upper charge limit in percent.
 # TYPE ecoflow_battery_charge_limit_percent gauge
 ecoflow_battery_charge_limit_percent{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 100
 ecoflow_battery_charge_limit_percent{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 90
-
 # HELP ecoflow_battery_discharge_limit_percent Configured lower discharge limit in percent.
 # TYPE ecoflow_battery_discharge_limit_percent gauge
 ecoflow_battery_discharge_limit_percent{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 10
 ecoflow_battery_discharge_limit_percent{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 10
-
 # HELP ecoflow_battery_backup_reserve_percent Configured backup reserve level in percent.
 # TYPE ecoflow_battery_backup_reserve_percent gauge
 ecoflow_battery_backup_reserve_percent{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 80
 ecoflow_battery_backup_reserve_percent{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 50
-
 # HELP ecoflow_battery_backup_reserve_enabled Backup reserve switch state, 1 when enabled.
 # TYPE ecoflow_battery_backup_reserve_enabled gauge
 ecoflow_battery_backup_reserve_enabled{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_battery_backup_reserve_enabled{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_ac_cable_connected 1 when the charging cable is detected as plugged in.
 # TYPE ecoflow_ac_cable_connected gauge
 ecoflow_ac_cable_connected{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 1
-
 # HELP ecoflow_battery_time_to_full_seconds Estimated time until the battery is full, in seconds.
 # TYPE ecoflow_battery_time_to_full_seconds gauge
-
 # HELP ecoflow_battery_time_to_empty_seconds Estimated time until the battery is empty, in seconds.
 # TYPE ecoflow_battery_time_to_empty_seconds gauge
-
 # HELP ecoflow_input_power_watts Total input power across all ports in watts.
 # TYPE ecoflow_input_power_watts gauge
 ecoflow_input_power_watts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_input_power_watts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_output_power_watts Total output power across all ports in watts.
 # TYPE ecoflow_output_power_watts gauge
 ecoflow_output_power_watts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_output_power_watts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_ac_input_power_watts AC input power in watts.
 # TYPE ecoflow_ac_input_power_watts gauge
 ecoflow_ac_input_power_watts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_ac_input_power_watts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_ac_output_power_watts AC output power in watts.
 # TYPE ecoflow_ac_output_power_watts gauge
 ecoflow_ac_output_power_watts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_ac_output_power_watts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_ac_input_voltage_volts AC input voltage in volts.
 # TYPE ecoflow_ac_input_voltage_volts gauge
 ecoflow_ac_input_voltage_volts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 225.365
 ecoflow_ac_input_voltage_volts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 223.465
-
 # HELP ecoflow_ac_input_current_amperes AC input current in amperes.
 # TYPE ecoflow_ac_input_current_amperes gauge
 ecoflow_ac_input_current_amperes{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 1.0090000000000001
 ecoflow_ac_input_current_amperes{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 1.212
-
 # HELP ecoflow_ac_input_frequency_hertz AC input frequency in hertz.
 # TYPE ecoflow_ac_input_frequency_hertz gauge
 ecoflow_ac_input_frequency_hertz{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 50
 ecoflow_ac_input_frequency_hertz{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 50
-
 # HELP ecoflow_ac_output_voltage_volts AC output voltage in volts.
 # TYPE ecoflow_ac_output_voltage_volts gauge
 ecoflow_ac_output_voltage_volts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 223.899
 ecoflow_ac_output_voltage_volts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 222.686
-
 # HELP ecoflow_ac_output_current_amperes AC output current in amperes.
 # TYPE ecoflow_ac_output_current_amperes gauge
 ecoflow_ac_output_current_amperes{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0.518
 ecoflow_ac_output_current_amperes{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_ac_output_frequency_hertz AC output frequency in hertz.
 # TYPE ecoflow_ac_output_frequency_hertz gauge
 ecoflow_ac_output_frequency_hertz{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 50
 ecoflow_ac_output_frequency_hertz{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 50
-
 # HELP ecoflow_inverter_temperature_celsius Inverter temperature in degrees Celsius.
 # TYPE ecoflow_inverter_temperature_celsius gauge
 ecoflow_inverter_temperature_celsius{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 44
 ecoflow_inverter_temperature_celsius{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 44
-
 # HELP ecoflow_dc_input_voltage_volts DC input voltage in volts.
 # TYPE ecoflow_dc_input_voltage_volts gauge
 ecoflow_dc_input_voltage_volts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_dc_input_voltage_volts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_dc_input_current_amperes DC input current in amperes.
 # TYPE ecoflow_dc_input_current_amperes gauge
 ecoflow_dc_input_current_amperes{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_dc_input_current_amperes{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_port_temperature_celsius Port temperature in degrees Celsius.
 # TYPE ecoflow_port_temperature_celsius gauge
 ecoflow_port_temperature_celsius{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500",port="dc_in"} 0
@@ -213,47 +150,38 @@ ecoflow_port_temperature_celsius{serial="R601ZCXXXXXXXXXX",model="RIVER 2",port=
 ecoflow_port_temperature_celsius{serial="R601ZCXXXXXXXXXX",model="RIVER 2",port="typec1"} 0
 ecoflow_port_temperature_celsius{serial="R601ZCXXXXXXXXXX",model="RIVER 2",port="car"} 0
 ecoflow_port_temperature_celsius{serial="R601ZCXXXXXXXXXX",model="RIVER 2",port="typec2"} 0
-
 # HELP ecoflow_solar_input_power_watts Solar or DC input power in watts.
 # TYPE ecoflow_solar_input_power_watts gauge
 ecoflow_solar_input_power_watts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_solar_input_power_watts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_solar_input_voltage_volts Solar or DC input voltage in volts.
 # TYPE ecoflow_solar_input_voltage_volts gauge
 ecoflow_solar_input_voltage_volts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 1.468
 ecoflow_solar_input_voltage_volts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 1.135
-
 # HELP ecoflow_solar_input_current_amperes Solar or DC input current in amperes.
 # TYPE ecoflow_solar_input_current_amperes gauge
 ecoflow_solar_input_current_amperes{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_solar_input_current_amperes{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_mppt_output_voltage_volts MPPT stage output voltage in volts.
 # TYPE ecoflow_mppt_output_voltage_volts gauge
 ecoflow_mppt_output_voltage_volts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 53.936
 ecoflow_mppt_output_voltage_volts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 13.239
-
 # HELP ecoflow_mppt_output_current_amperes MPPT stage output current in amperes.
 # TYPE ecoflow_mppt_output_current_amperes gauge
 ecoflow_mppt_output_current_amperes{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_mppt_output_current_amperes{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_dc_output_power_watts 12 V car-port output power in watts.
 # TYPE ecoflow_dc_output_power_watts gauge
 ecoflow_dc_output_power_watts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_dc_output_power_watts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_dc_output_voltage_volts 12 V car-port output voltage in volts.
 # TYPE ecoflow_dc_output_voltage_volts gauge
 ecoflow_dc_output_voltage_volts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_dc_output_voltage_volts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_dc_output_current_amperes 12 V car-port output current in amperes.
 # TYPE ecoflow_dc_output_current_amperes gauge
 ecoflow_dc_output_current_amperes{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_dc_output_current_amperes{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_usb_output_power_watts USB port output power in watts.
 # TYPE ecoflow_usb_output_power_watts gauge
 ecoflow_usb_output_power_watts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500",port="typec2"} 0
@@ -268,61 +196,49 @@ ecoflow_usb_output_power_watts{serial="R601ZCXXXXXXXXXX",model="RIVER 2",port="q
 ecoflow_usb_output_power_watts{serial="R601ZCXXXXXXXXXX",model="RIVER 2",port="typec1"} 0
 ecoflow_usb_output_power_watts{serial="R601ZCXXXXXXXXXX",model="RIVER 2",port="qcusb1"} 0
 ecoflow_usb_output_power_watts{serial="R601ZCXXXXXXXXXX",model="RIVER 2",port="usb2"} 0
-
 # HELP ecoflow_usb_input_power_watts USB-C input power in watts.
 # TYPE ecoflow_usb_input_power_watts gauge
 ecoflow_usb_input_power_watts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_ac_output_enabled AC output switch state, 1 when enabled.
 # TYPE ecoflow_ac_output_enabled gauge
 ecoflow_ac_output_enabled{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 1
 ecoflow_ac_output_enabled{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 1
-
 # HELP ecoflow_dc_output_enabled 12 V car-port switch state, 1 when enabled.
 # TYPE ecoflow_dc_output_enabled gauge
 ecoflow_dc_output_enabled{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_dc_output_enabled{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_usb_output_enabled USB output switch state, 1 when enabled.
 # TYPE ecoflow_usb_output_enabled gauge
 ecoflow_usb_output_enabled{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_usb_output_enabled{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_xboost_enabled X-Boost switch state, 1 when enabled.
 # TYPE ecoflow_xboost_enabled gauge
 ecoflow_xboost_enabled{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_xboost_enabled{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 1
-
 # HELP ecoflow_beeper_enabled Beeper switch state, 1 when enabled.
 # TYPE ecoflow_beeper_enabled gauge
 ecoflow_beeper_enabled{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 1
 ecoflow_beeper_enabled{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_ups_mode_enabled UPS mode state, 1 when enabled.
 # TYPE ecoflow_ups_mode_enabled gauge
 ecoflow_ups_mode_enabled{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 1
 ecoflow_ups_mode_enabled{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 1
-
 # HELP ecoflow_fan_level Cooling fan level reported by the EMS.
 # TYPE ecoflow_fan_level gauge
 ecoflow_fan_level{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
 ecoflow_fan_level{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 0
-
 # HELP ecoflow_ac_charge_power_setpoint_watts Configured maximum AC charging power in watts.
 # TYPE ecoflow_ac_charge_power_setpoint_watts gauge
 ecoflow_ac_charge_power_setpoint_watts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 800
 ecoflow_ac_charge_power_setpoint_watts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 360
-
 # HELP ecoflow_dc_charge_current_setpoint_amperes Configured maximum DC charging current in amperes.
 # TYPE ecoflow_dc_charge_current_setpoint_amperes gauge
 ecoflow_dc_charge_current_setpoint_amperes{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 8
 ecoflow_dc_charge_current_setpoint_amperes{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 8
-
 # HELP ecoflow_ac_output_voltage_setpoint_volts Configured AC output voltage in volts.
 # TYPE ecoflow_ac_output_voltage_setpoint_volts gauge
 ecoflow_ac_output_voltage_setpoint_volts{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 230
 ecoflow_ac_output_voltage_setpoint_volts{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 220
-
 # HELP ecoflow_energy_charged_watt_hours Lifetime energy charged, in watt-hours, as counted by the device.
 # TYPE ecoflow_energy_charged_watt_hours gauge
 ecoflow_energy_charged_watt_hours{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500",path="solar"} 0
@@ -331,34 +247,27 @@ ecoflow_energy_charged_watt_hours{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"
 ecoflow_energy_charged_watt_hours{serial="R601ZCXXXXXXXXXX",model="RIVER 2",path="solar"} 0
 ecoflow_energy_charged_watt_hours{serial="R601ZCXXXXXXXXXX",model="RIVER 2",path="ac"} 47173
 ecoflow_energy_charged_watt_hours{serial="R601ZCXXXXXXXXXX",model="RIVER 2",path="dc"} 0
-
 # HELP ecoflow_energy_discharged_watt_hours Lifetime energy discharged, in watt-hours, as counted by the device.
 # TYPE ecoflow_energy_discharged_watt_hours gauge
 ecoflow_energy_discharged_watt_hours{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500",path="ac"} 0
 ecoflow_energy_discharged_watt_hours{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500",path="dc"} 0
 ecoflow_energy_discharged_watt_hours{serial="R601ZCXXXXXXXXXX",model="RIVER 2",path="ac"} 12719
 ecoflow_energy_discharged_watt_hours{serial="R601ZCXXXXXXXXXX",model="RIVER 2",path="dc"} 318
-
 # HELP ecoflow_battery_energy_charged_watt_hours Lifetime energy charged into the pack, in watt-hours, as counted by the BMS.
 # TYPE ecoflow_battery_energy_charged_watt_hours gauge
 ecoflow_battery_energy_charged_watt_hours{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 127599
-
 # HELP ecoflow_battery_energy_discharged_watt_hours Lifetime energy discharged from the pack, in watt-hours, as counted by the BMS.
 # TYPE ecoflow_battery_energy_discharged_watt_hours gauge
 ecoflow_battery_energy_discharged_watt_hours{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 122610
-
 # HELP ecoflow_battery_internal_resistance_milliohms Battery internal resistance in milliohms.
 # TYPE ecoflow_battery_internal_resistance_milliohms gauge
 ecoflow_battery_internal_resistance_milliohms{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 25
-
 # HELP ecoflow_battery_round_trip_efficiency_percent Round-trip efficiency in percent, as counted by the BMS.
 # TYPE ecoflow_battery_round_trip_efficiency_percent gauge
 ecoflow_battery_round_trip_efficiency_percent{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 70
-
 # HELP ecoflow_battery_deep_discharge_events Number of deep-discharge events recorded by the BMS.
 # TYPE ecoflow_battery_deep_discharge_events gauge
 ecoflow_battery_deep_discharge_events{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 0
-
 # HELP ecoflow_error_code Raw error or fault code reported by a device module. Zero means the module reports nothing; a non-zero value is the device's own code, and some modules report a constant non-zero value even when healthy.
 # TYPE ecoflow_error_code gauge
 ecoflow_error_code{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500",module="inverter"} 0
@@ -375,43 +284,34 @@ ecoflow_error_code{serial="R601ZCXXXXXXXXXX",model="RIVER 2",module="bms"} 0
 ecoflow_error_code{serial="R601ZCXXXXXXXXXX",model="RIVER 2",module="ems_warning"} 0
 ecoflow_error_code{serial="R601ZCXXXXXXXXXX",model="RIVER 2",module="mppt"} 4096
 ecoflow_error_code{serial="R601ZCXXXXXXXXXX",model="RIVER 2",module="pd"} 0
-
 # HELP ecoflow_build_info Constant 1 series carrying exporter build labels.
 # TYPE ecoflow_build_info gauge
 ecoflow_build_info{version="0.0.0-golden",mode="private"} 1
-
 # HELP ecoflow_device_up 1 when the exporter holds telemetry for this device that is newer than the freshness budget.
 # TYPE ecoflow_device_up gauge
 ecoflow_device_up{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 1
 ecoflow_device_up{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 1
-
 # HELP ecoflow_device_online 1 when the EcoFlow cloud reports the device as online.
 # TYPE ecoflow_device_online gauge
 ecoflow_device_online{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 1
 ecoflow_device_online{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 1
-
 # HELP ecoflow_device_last_seen_timestamp_seconds Unix timestamp of the most recent telemetry frame accepted for this device.
 # TYPE ecoflow_device_last_seen_timestamp_seconds gauge
 ecoflow_device_last_seen_timestamp_seconds{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 1700000000
 ecoflow_device_last_seen_timestamp_seconds{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 1700000000
-
 # HELP ecoflow_device_info Constant 1 series carrying device identity labels.
 # TYPE ecoflow_device_info gauge
 ecoflow_device_info{serial="D361ZEXXXXXXXXXX",model="DELTA 3 1500"} 1
 ecoflow_device_info{serial="R601ZCXXXXXXXXXX",model="RIVER 2"} 1
-
 # HELP ecoflow_source_up 1 when the upstream data source is connected and delivering.
 # TYPE ecoflow_source_up gauge
 ecoflow_source_up{source="private"} 1
-
 # HELP ecoflow_source_errors_total Total upstream failures, labelled by a stable machine-readable reason.
 # TYPE ecoflow_source_errors_total counter
-
 # HELP ecoflow_frames_total Total telemetry frames accepted per device.
 # TYPE ecoflow_frames_total counter
 ecoflow_frames_total{serial="D361ZEXXXXXXXXXX"} 1
 ecoflow_frames_total{serial="R601ZCXXXXXXXXXX"} 1
-
 # HELP ecoflow_unmapped_field_count Number of distinct payload keys seen for this device that have no field-map entry.
 # TYPE ecoflow_unmapped_field_count gauge
 ecoflow_unmapped_field_count{serial="D361ZEXXXXXXXXXX"} 112

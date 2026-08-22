@@ -12,6 +12,11 @@ updates:
         dependency-type: development
       production-dependencies:
         dependency-type: production
+    ignore:
+      # typescript-eslint does not support the TypeScript 7 Go port yet, so the
+      # type-aware lint rules stop working the moment this is bumped.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /

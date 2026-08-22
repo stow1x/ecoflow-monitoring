@@ -11,6 +11,7 @@ permissions:
 jobs:
   classify:
     name: conventional title and label
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Validate the title
