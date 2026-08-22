@@ -1,6 +1,6 @@
 {
   "name": "ecoflow-monitoring",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Prometheus exporter and Grafana stack for EcoFlow power stations",
   "keywords": [
     "ecoflow",
