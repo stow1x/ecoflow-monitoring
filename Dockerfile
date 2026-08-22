@@ -1,4 +1,4 @@
-FROM node:24-alpine AS deps
+FROM node:26-alpine AS deps
 
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable
@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml .npmrc ./
 RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
-FROM node:24-alpine AS runtime
+FROM node:26-alpine AS runtime
 
 ENV NODE_ENV=production
 WORKDIR /app
