@@ -1,0 +1,1113 @@
+{
+  "uid": "ecoflow-overview",
+  "title": "EcoFlow Overview",
+  "description": "Battery, power flow and health for every EcoFlow station the exporter can see.",
+  "tags": [
+    "ecoflow"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 41,
+  "version": 1,
+  "editable": false,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "serial",
+        "label": "Station",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "ecoflow-prometheus"
+        },
+        "query": {
+          "qryType": 1,
+          "query": "label_values(ecoflow_device_info, serial)",
+          "refId": "serial"
+        },
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "gauge",
+      "title": "State of charge",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ecoflow-prometheus"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_battery_soc_percent{serial=~\"$serial\"}",
+          "legendFormat": "{{model}}",
+          "instant": true
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "minVizHeight": 75,
+        "minVizWidth": 75
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 20
+              },
+              {
+                "color": "yellow",
+                "value": 40
+              },
+              {
+                "color": "green",
+                "value": 60
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Power now",
+      "description": "Total input and output across all ports.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ecoflow-prometheus"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_input_power_watts{serial=~\"$serial\"}",
+          "legendFormat": "{{model}} in",
+          "instant": true
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_output_power_watts{serial=~\"$serial\"}",
+          "legendFormat": "{{model}} out",
+          "instant": true
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Reachability",
+      "description": "1 while the exporter holds telemetry newer than DEVICE_TTL_SECONDS.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ecoflow-prometheus"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_device_up{serial=~\"$serial\"}",
+          "legendFormat": "{{model}}",
+          "instant": true
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto",
+        "orientation": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Stale",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "Live",
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "State of charge over time",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ecoflow-prometheus"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_battery_soc_percent{serial=~\"$serial\"}",
+          "legendFormat": "{{model}}"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "decimals": 1,
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Power flow",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ecoflow-prometheus"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_input_power_watts{serial=~\"$serial\"}",
+          "legendFormat": "{{model}} input"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_output_power_watts{serial=~\"$serial\"}",
+          "legendFormat": "{{model}} output"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_ac_input_power_watts{serial=~\"$serial\"}",
+          "legendFormat": "{{model}} AC in"
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_solar_input_power_watts{serial=~\"$serial\"}",
+          "legendFormat": "{{model}} solar in"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt",
+          "min": 0,
+          "decimals": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "AC input",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ecoflow-prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 14
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_ac_input_voltage_volts{serial=~\"$serial\"}",
+          "legendFormat": "{{model}} voltage"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_ac_input_current_amperes{serial=~\"$serial\"}",
+          "legendFormat": "{{model}} current"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "volt",
+          "decimals": 1,
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*current.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "amp"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Battery temperature and cell balance",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ecoflow-prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 14
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_battery_temperature_celsius{serial=~\"$serial\"}",
+          "legendFormat": "{{model}} pack"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_battery_cell_temperature_max_celsius{serial=~\"$serial\"}",
+          "legendFormat": "{{model}} hottest cell"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_battery_cell_voltage_spread_volts{serial=~\"$serial\"}",
+          "legendFormat": "{{model}} cell spread"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*spread.*"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "volt"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Output by port",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ecoflow-prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 14
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_usb_output_power_watts{serial=~\"$serial\"} > 0",
+          "legendFormat": "{{model}} {{port}}"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_ac_output_power_watts{serial=~\"$serial\"} > 0",
+          "legendFormat": "{{model}} AC"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_dc_output_power_watts{serial=~\"$serial\"} > 0",
+          "legendFormat": "{{model}} 12V"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt",
+          "min": 0,
+          "decimals": 1,
+          "noValue": "Every port idle",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 20,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 9,
+      "type": "table",
+      "title": "Battery health",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ecoflow-prometheus"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 22
+      },
+      "targets": [
+        {
+          "refId": "SOH",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_battery_soh_percent{serial=~\"$serial\"}",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "refId": "CYCLES",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_battery_cycles{serial=~\"$serial\"}",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "refId": "REMAIN",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_battery_remaining_capacity_amp_hours{serial=~\"$serial\"}",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "refId": "FULL",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_battery_full_capacity_amp_hours{serial=~\"$serial\"}",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "refId": "VOLT",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_battery_voltage_volts{serial=~\"$serial\"}",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "refId": "CHGLIM",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_battery_charge_limit_percent{serial=~\"$serial\"}",
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "refId": "DSGLIM",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_battery_discharge_limit_percent{serial=~\"$serial\"}",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "serial",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Time 1": true,
+              "Time 2": true,
+              "Time 3": true,
+              "Time 4": true,
+              "Time 5": true,
+              "__name__": true,
+              "__name__ 1": true,
+              "__name__ 2": true,
+              "__name__ 3": true,
+              "__name__ 4": true,
+              "__name__ 5": true,
+              "instance": true,
+              "instance 1": true,
+              "instance 2": true,
+              "instance 3": true,
+              "instance 4": true,
+              "instance 5": true,
+              "job": true,
+              "job 1": true,
+              "job 2": true,
+              "job 3": true,
+              "job 4": true,
+              "job 5": true,
+              "model 2": true,
+              "model 3": true,
+              "model 4": true,
+              "model 5": true,
+              "Time 6": true,
+              "__name__ 6": true,
+              "instance 6": true,
+              "job 6": true,
+              "model 6": true,
+              "Time 7": true,
+              "__name__ 7": true,
+              "instance 7": true,
+              "job 7": true,
+              "model 7": true
+            },
+            "renameByName": {
+              "model 1": "Model",
+              "serial": "Serial",
+              "Value #SOH": "State of health",
+              "Value #CYCLES": "Cycles",
+              "Value #REMAIN": "Remaining",
+              "Value #FULL": "Full capacity",
+              "Value #VOLT": "Pack voltage",
+              "Value #CHGLIM": "Charge limit",
+              "Value #DSGLIM": "Discharge limit"
+            }
+          }
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "countRows": false,
+          "fields": ""
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "State of health"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Remaining"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "amph"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Full capacity"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "amph"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pack voltage"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "volt"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*limit"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Lifetime energy counters",
+      "description": "Odometers reported by the device, not a rate.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ecoflow-prometheus"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 22
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_energy_charged_watt_hours{serial=~\"$serial\"} > 0",
+          "legendFormat": "{{model}} charged {{path}}"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_energy_discharged_watt_hours{serial=~\"$serial\"} > 0",
+          "legendFormat": "{{model}} discharged {{path}}"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watth",
+          "decimals": 0,
+          "noValue": "No lifetime counters reported yet",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 11,
+      "type": "table",
+      "title": "Active fault codes",
+      "description": "Only non-zero codes. Some modules report a constant non-zero value on healthy hardware; see docs/open-questions.md.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ecoflow-prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 29
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_error_code{serial=~\"$serial\"} != 0",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "instance": true,
+              "job": true,
+              "serial": true
+            },
+            "renameByName": {
+              "model": "Model",
+              "module": "Module",
+              "Value": "Code"
+            }
+          }
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "countRows": false,
+          "fields": ""
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "No fault codes reported",
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            }
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Exporter health",
+      "description": "Upstream connectivity, telemetry age and payload keys the field map does not cover.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "ecoflow-prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "time() - ecoflow_device_last_seen_timestamp_seconds{serial=~\"$serial\"}",
+          "legendFormat": "{{model}} age"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "ecoflow_unmapped_field_count{serial=~\"$serial\"}",
+          "legendFormat": "{{model}} unmapped"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ecoflow-prometheus"
+          },
+          "expr": "sum by (source) (ecoflow_source_up)",
+          "legendFormat": "{{source}} up"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 0,
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*(unmapped|up)$"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

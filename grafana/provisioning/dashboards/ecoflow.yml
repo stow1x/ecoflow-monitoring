@@ -1,0 +1,16 @@
+apiVersion: 1
+
+providers:
+  - name: ecoflow
+    type: file
+    orgId: 1
+    folder: EcoFlow
+    folderUid: ecoflow
+    disableDeletion: false
+    allowUiUpdates: false
+    # Values <= 10 make Grafana rely on filesystem watch events that Docker
+    # bind mounts do not reliably deliver.
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or setup help
+    url: https://github.com/stow1x/ecoflow-monitoring/discussions
+    about: Ask before opening an issue if you are unsure whether something is a bug.
+  - name: Security vulnerability
+    url: https://github.com/stow1x/ecoflow-monitoring/security/advisories/new
+    about: Report privately. Do not open a public issue for a vulnerability.

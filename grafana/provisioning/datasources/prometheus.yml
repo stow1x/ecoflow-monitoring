@@ -1,0 +1,18 @@
+apiVersion: 1
+
+prune: true
+
+datasources:
+  - name: Prometheus
+    uid: ecoflow-prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: 30s
+      httpMethod: POST
+      manageAlerts: false
+      prometheusType: Prometheus
+      prometheusVersion: 3.14.0

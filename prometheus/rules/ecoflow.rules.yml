@@ -1,0 +1,161 @@
+groups:
+  - name: ecoflow-battery
+    rules:
+      - alert: EcoflowBatteryLow
+        expr: ecoflow_battery_soc_percent < 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Battery low on {{ $labels.model }} ({{ $labels.serial }})'
+          description: '{{ $labels.model }} {{ $labels.serial }} is at {{ $value | printf "%.0f" }}% state of charge, below the 20% warning threshold. Plug it in or reduce the load.'
+
+      - alert: EcoflowBatteryCritical
+        expr: ecoflow_battery_soc_percent < 10
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Battery critically low on {{ $labels.model }} ({{ $labels.serial }})'
+          description: '{{ $labels.model }} {{ $labels.serial }} is at {{ $value | printf "%.0f" }}% state of charge, below the 10% critical threshold. The unit will shut down soon and anything it powers will lose supply.'
+
+      - alert: EcoflowBatteryOverTemperature
+        expr: ecoflow_battery_cell_temperature_max_celsius > 45
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Battery cells running hot on {{ $labels.model }} ({{ $labels.serial }})'
+          description: 'Hottest cell of {{ $labels.model }} {{ $labels.serial }} is {{ $value | printf "%.1f" }} C, above the 45 C warning threshold. Improve ventilation or lower the charge/discharge power.'
+
+      - alert: EcoflowBatteryOverTemperatureCritical
+        expr: ecoflow_battery_cell_temperature_max_celsius > 55
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Battery over-temperature on {{ $labels.model }} ({{ $labels.serial }})'
+          description: 'Hottest cell of {{ $labels.model }} {{ $labels.serial }} is {{ $value | printf "%.1f" }} C, above the 55 C critical threshold. Stop charging and discharging and let the pack cool down.'
+
+      - alert: EcoflowBatteryChargingBelowFreezing
+        expr: ecoflow_battery_cell_temperature_min_celsius < 0 and on (serial, model) ecoflow_input_power_watts > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Sub-zero charging on {{ $labels.model }} ({{ $labels.serial }})'
+          description: 'Coldest cell of {{ $labels.model }} {{ $labels.serial }} is {{ $value | printf "%.1f" }} C while the unit is drawing input power. Charging a lithium pack below 0 C plates lithium and permanently damages it. Cut the charge input until the pack warms up.'
+
+      - alert: EcoflowBatteryUnderTemperature
+        expr: ecoflow_battery_cell_temperature_min_celsius < -10
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Battery very cold on {{ $labels.model }} ({{ $labels.serial }})'
+          description: 'Coldest cell of {{ $labels.model }} {{ $labels.serial }} is {{ $value | printf "%.1f" }} C, below the -10 C threshold. Usable capacity is heavily reduced and charging is unsafe at this temperature.'
+
+      - alert: EcoflowCellVoltageSpreadHigh
+        expr: ecoflow_battery_cell_voltage_spread_volts > 0.1
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Cell imbalance on {{ $labels.model }} ({{ $labels.serial }})'
+          description: 'Cell voltage spread on {{ $labels.model }} {{ $labels.serial }} is {{ $value | printf "%.3f" }} V, above the 0.1 V threshold. Charge the unit to 100% and hold it there to let the BMS balance the pack.'
+
+      - alert: EcoflowCellVoltageSpreadCritical
+        expr: ecoflow_battery_cell_voltage_spread_volts > 0.3
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Severe cell imbalance on {{ $labels.model }} ({{ $labels.serial }})'
+          description: 'Cell voltage spread on {{ $labels.model }} {{ $labels.serial }} is {{ $value | printf "%.3f" }} V, above the 0.3 V critical threshold. This usually means a failing cell; stop relying on this unit for backup power.'
+
+  - name: ecoflow-power
+    rules:
+      - alert: EcoflowGridInputLost
+        expr: ecoflow_ac_input_power_watts == 0 and on (serial, model) ecoflow_output_power_watts > 25
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Grid input lost on {{ $labels.model }} ({{ $labels.serial }})'
+          description: '{{ $labels.model }} {{ $labels.serial }} has no AC input power while still delivering more than 25 W, so it is now running the load off the battery. Check the wall socket, the breaker and the charging brick.'
+
+      - alert: EcoflowDeviceError
+        expr: ecoflow_error_code{module=~"pd|inverter|bms_fault|bms_all_fault|ems_warning"} != 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Error code {{ $value }} from {{ $labels.module }} on {{ $labels.model }} ({{ $labels.serial }})'
+          description: 'Module {{ $labels.module }} of {{ $labels.model }} {{ $labels.serial }} reports raw error code {{ $value }}. Look the code up in the EcoFlow app or the device manual. The bms, bms_all and mppt modules are excluded from this alert because healthy hardware reports constant non-zero values there; EcoflowDeviceErrorChanged watches those instead.'
+
+      - alert: EcoflowDeviceErrorChanged
+        expr: changes(ecoflow_error_code{module=~"bms|bms_all|mppt"}[15m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Error code on {{ $labels.module }} changed on {{ $labels.model }} ({{ $labels.serial }})'
+          description: 'Module {{ $labels.module }} of {{ $labels.model }} {{ $labels.serial }} changed its raw error code within the last 15 minutes, current value {{ $value }}. These modules report a constant non-zero code even when healthy, so only a change is meaningful.'
+
+  - name: ecoflow-availability
+    rules:
+      - alert: EcoflowDeviceDown
+        expr: ecoflow_device_up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'No fresh telemetry from {{ $labels.model }} ({{ $labels.serial }})'
+          description: 'The exporter has not seen telemetry from {{ $labels.model }} {{ $labels.serial }} within DEVICE_TTL_SECONDS. Either the device lost its network connection or the EcoFlow data path stopped delivering frames.'
+
+      - alert: EcoflowDeviceOffline
+        expr: ecoflow_device_online == 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: '{{ $labels.model }} ({{ $labels.serial }}) reported offline by the cloud'
+          description: 'The EcoFlow cloud reports {{ $labels.model }} {{ $labels.serial }} as offline. The online flag can lag reality by up to 15 minutes, so this only fires after a sustained offline report.'
+
+      - alert: EcoflowDeviceNeverReported
+        expr: ecoflow_device_info unless on (serial) (ecoflow_device_last_seen_timestamp_seconds > 0)
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: '{{ $labels.model }} ({{ $labels.serial }}) has never reported telemetry'
+          description: '{{ $labels.model }} {{ $labels.serial }} is known to the exporter but has never produced a single telemetry frame since startup. This is the signature of a device category that the EcoFlow API refuses to expose (error code 1006) or of a wrong ECOFLOW_SERIALS entry, not of a flaky connection.'
+
+      - alert: EcoflowTelemetryStale
+        expr: time() - ecoflow_device_last_seen_timestamp_seconds > 1800
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Telemetry badly stale for {{ $labels.model }} ({{ $labels.serial }})'
+          description: 'Last telemetry frame from {{ $labels.model }} {{ $labels.serial }} is {{ $value | printf "%.0f" }} seconds old, more than the 1800 second staleness budget. Everything shown for this device on the dashboard is historical.'
+
+  - name: ecoflow-exporter
+    rules:
+      - alert: EcoflowSourceDown
+        expr: ecoflow_source_up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'EcoFlow {{ $labels.source }} data source is down'
+          description: 'The {{ $labels.source }} data source is not connected, so no device in the fleet is being updated. Check the exporter logs for authentication failures and MQTT disconnects.'
+
+      - alert: EcoflowSourceErrorsRising
+        expr: increase(ecoflow_source_errors_total[15m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'EcoFlow {{ $labels.source }} source failing with reason {{ $labels.reason }}'
+          description: 'The {{ $labels.source }} data source recorded {{ $value | printf "%.0f" }} errors with reason {{ $labels.reason }} in the last 15 minutes. Sustained errors mean telemetry is being dropped even while the source still looks connected.'

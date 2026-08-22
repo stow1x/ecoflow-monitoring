@@ -1,0 +1,74 @@
+name: Device or field support
+description: A station is not recognised, or a payload key is not exported as a metric.
+labels: ["feat", "device-support"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This project only exports fields whose unit is established by a primary source **and**
+        corroborated by a real captured value. A key with an unproven scale belongs in
+        `DISPUTED_FIELDS`, not in `FIELD_MAP`. The capture you attach here is what makes the
+        difference between the two.
+
+  - type: input
+    id: model
+    attributes:
+      label: Model and serial prefix
+      description: The first four characters of the serial only.
+      placeholder: DELTA 3 Max (D381)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Which mode reaches this device
+      options:
+        - private (app account)
+        - official (AccessKey/SecretKey)
+        - neither, the official API answers 1006
+    validations:
+      required: true
+
+  - type: textarea
+    id: unmapped
+    attributes:
+      label: Unmapped keys
+      description: Output of `curl localhost:9101/debug/unmapped`.
+      render: json
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Unit evidence
+      description: |
+        For each key you want exported, say what the value means and how you know its unit.
+        Two things settle a unit: an official EcoFlow documentation page that states it, and a
+        captured value that could only be that unit. A cross-check against another field is the
+        strongest evidence, for example a pack voltage that matches cell voltage times cell count.
+      placeholder: |
+        bms_bmsStatus.vol = 55028 while maxCellVol = 3463 mV on a 16-cell pack.
+        16 x 3.463 V = 55.4 V, so the raw value is millivolts.
+    validations:
+      required: true
+
+  - type: textarea
+    id: capture
+    attributes:
+      label: Capture
+      description: |
+        Run `pnpm run capture` (or `DUMP_RAW_DIR=/tmp/raw`) through at least one full snapshot
+        cycle and attach the NDJSON. Both write scrubbed output: secrets are redacted and serials
+        are masked down to the four-character model prefix. Read it before attaching anyway.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: The attached capture contains no full serial, e-mail, token or key.
+          required: true

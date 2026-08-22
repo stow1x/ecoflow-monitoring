@@ -1,0 +1,35 @@
+name: Feature request
+description: Propose behaviour this project does not have yet.
+labels: ["feat"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you are unable to do today. Describe the situation, not the solution.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour
+      description: What the exporter, the dashboard or the alerts should do instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried
+      description: |
+        Existing metrics, PromQL, or Grafana panels you already attempted. Many requests are
+        answerable with a query over series that already exist.
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: This is read-only. Sending commands to a station is deliberately out of scope.
+          required: true

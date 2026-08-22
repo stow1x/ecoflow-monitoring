@@ -1,0 +1,11 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.probe/
+raw/
+*.ndjson
+!fixtures/**/*.ndjson
+coverage/
+*.log
+.DS_Store

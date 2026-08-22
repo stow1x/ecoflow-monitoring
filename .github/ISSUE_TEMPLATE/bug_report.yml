@@ -1,0 +1,82 @@
+name: Bug report
+description: Something behaves differently from what the documentation promises.
+labels: ["fix"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing: a metric that is **absent** is often intentional. The exporter never invents
+        a value it has not received, and it drops device sentinels such as the runtime estimate.
+        See [docs/open-questions.md](../../blob/main/docs/open-questions.md).
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you observed, and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      placeholder: |
+        1. Set ECOFLOW_MODE=private
+        2. docker compose up -d
+        3. curl localhost:9101/metrics | grep ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      options:
+        - private (app account)
+        - official (AccessKey/SecretKey)
+    validations:
+      required: true
+
+  - type: input
+    id: devices
+    attributes:
+      label: Devices
+      description: Model name and the first four characters of the serial. Never paste a full serial.
+      placeholder: DELTA 3 1500 (D361), RIVER 2 (R601)
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Exporter version
+      description: The `version` label of `ecoflow_build_info`, or the image tag.
+      placeholder: 0.2.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Exporter logs
+      description: |
+        `docker compose logs exporter --tail 100`. Logs redact secrets, but check before pasting.
+      render: text
+
+  - type: textarea
+    id: metrics
+    attributes:
+      label: Relevant metrics
+      description: The output of `curl localhost:9101/metrics | grep ecoflow_` for the affected series.
+      render: text
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I waited at least five minutes after startup, since the private stream sends a full snapshot only every ~300 s.
+          required: true
+        - label: No full serial number, e-mail, access key or password appears anywhere in this report.
+          required: true
