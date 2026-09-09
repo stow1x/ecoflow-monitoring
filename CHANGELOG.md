@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.0](https://github.com/stow1x/ecoflow-monitoring/compare/v0.1.0...v0.2.0) (2026-09-09)
+
+
+### Features
+
+* let a fork run its own published images ([#23](https://github.com/stow1x/ecoflow-monitoring/issues/23)) ([9399bb2](https://github.com/stow1x/ecoflow-monitoring/commit/9399bb28609ad04bebfa5fdc5553ae594687b3ee))
+* publish prometheus and grafana images so install needs no clone ([#19](https://github.com/stow1x/ecoflow-monitoring/issues/19)) ([5a80d32](https://github.com/stow1x/ecoflow-monitoring/commit/5a80d320d984f7a591baaf51cdff6f927a86b7c4))
+
+
+### Documentation
+
+* show how a pull-only install overrides baked config ([#24](https://github.com/stow1x/ecoflow-monitoring/issues/24)) ([d464ebb](https://github.com/stow1x/ecoflow-monitoring/commit/d464ebbf5dd50308a78e40c24b9f5e59f8e04d2f))
+
 ## 0.1.0 (2026-08-22)
 
 
