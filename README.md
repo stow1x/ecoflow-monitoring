@@ -111,6 +111,24 @@ There is nothing to click afterwards. Filling in `.env` is the only manual step 
 install; see [How it works](#how-it-works) for what the three containers arrange between
 themselves at startup.
 
+## Forking it
+
+The workflows are namespace-agnostic: `release.yml` publishes to `ghcr.io/${{ github.repository }}`,
+so a fork's CI pushes all three images to the fork's own account without any edit. Point the stack
+at them with one line in `.env`:
+
+```dotenv
+ECOFLOW_IMAGE=ghcr.io/your-account/ecoflow-monitoring
+```
+
+Package visibility is inherited from the repository on first publish — a public fork gets public
+packages that pull anonymously, a private fork gets private ones needing `docker login`.
+
+Releases are cut by release-please. If your fork protects its default branch with required status
+checks, add a `RELEASE_PLEASE_TOKEN` secret (a PAT with Contents and Pull requests write): GitHub
+does not trigger workflows for refs pushed with `GITHUB_TOKEN`, so without it the release PR
+receives no checks and can never merge. Nothing else in CI needs a secret.
+
 ## How it works
 
 `docker compose up -d` starts three containers, and everything they need is baked into their

@@ -3,10 +3,13 @@ name: ecoflow-monitoring
 # Everything this stack needs is inside the three published images, so this file plus a filled-in
 # .env is the whole install -- no clone, no build. Contributors who want to build from source or
 # edit dashboards live add compose.build.yaml on top; see CONTRIBUTING.md.
+#
+# A fork's CI publishes to its own namespace, so the registry prefix is overridable: set
+# ECOFLOW_IMAGE=ghcr.io/<your-account>/ecoflow-monitoring in .env to run your own images.
 
 services:
   exporter:
-    image: ghcr.io/stow1x/ecoflow-monitoring:${ECOFLOW_TAG:-latest}
+    image: ${ECOFLOW_IMAGE:-ghcr.io/stow1x/ecoflow-monitoring}:${ECOFLOW_TAG:-latest}
     environment:
       ECOFLOW_MODE: ${ECOFLOW_MODE:-private}
       ECOFLOW_EMAIL: ${ECOFLOW_EMAIL:-}
@@ -48,7 +51,7 @@ services:
     #   - ./raw:/data/raw
 
   prometheus:
-    image: ghcr.io/stow1x/ecoflow-monitoring/prometheus:${ECOFLOW_TAG:-latest}
+    image: ${ECOFLOW_IMAGE:-ghcr.io/stow1x/ecoflow-monitoring}/prometheus:${ECOFLOW_TAG:-latest}
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
@@ -76,7 +79,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: ghcr.io/stow1x/ecoflow-monitoring/grafana:${ECOFLOW_TAG:-latest}
+    image: ${ECOFLOW_IMAGE:-ghcr.io/stow1x/ecoflow-monitoring}/grafana:${ECOFLOW_TAG:-latest}
     ports:
       - "3000:3000"
     environment:
