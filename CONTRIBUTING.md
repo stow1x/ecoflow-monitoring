@@ -24,8 +24,9 @@ curl localhost:9101/metrics
 Or the whole stack, including Prometheus and Grafana:
 
 ```bash
-pnpm run docker:up      # docker compose up -d --build
-pnpm run docker:down    # docker compose down
+pnpm run docker:up      # build all three images from this tree, mount config live
+pnpm run docker:down    # stop them, keeping the metric history
+pnpm run docker:pull    # run the published images instead of building
 ```
 
 ## Pull requests

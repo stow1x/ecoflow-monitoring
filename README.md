@@ -65,16 +65,28 @@ ECOFLOW_SERIALS=D361ZEXXXXXXXXXX,R601ZCXXXXXXXXXX
 
 ## Quick start
 
+Two files, no clone, no build — the Prometheus scrape config, the alert rules, the datasource and
+the dashboard are baked into the published images:
+
 ```bash
-git clone https://github.com/stow1x/ecoflow-monitoring
-cd ecoflow-monitoring
-cp .env.example .env
+curl -O https://raw.githubusercontent.com/stow1x/ecoflow-monitoring/main/compose.yaml
+curl -o .env https://raw.githubusercontent.com/stow1x/ecoflow-monitoring/main/.env.example
 $EDITOR .env
 docker compose up -d
 ```
 
 Grafana is on <http://localhost:3000> (`admin` / `GRAFANA_PASSWORD`), with the **EcoFlow Overview**
 dashboard already provisioned. Prometheus is not published on the host; reach it through Grafana.
+
+The images are public on ghcr.io and pull anonymously, so no registry login is needed. `latest` is
+the default; pin a release with `ECOFLOW_TAG=0.2.0` in `.env`, or track the tip of `main` with
+`ECOFLOW_TAG=edge`.
+
+To upgrade, pull and recreate:
+
+```bash
+docker compose pull && docker compose up -d
+```
 
 Running without Docker needs Node 24, which executes the TypeScript sources directly:
 
@@ -90,8 +102,8 @@ themselves at startup.
 
 ## How it works
 
-`docker compose up -d` starts three containers, and everything they need is in the repository, so
-no dashboard gets imported by hand and no scrape target gets registered in a UI.
+`docker compose up -d` starts three containers, and everything they need is baked into their
+images, so no dashboard gets imported by hand and no scrape target gets registered in a UI.
 
 **1. The exporter authenticates and subscribes.** In `private` mode it posts your credentials to
 `/auth/login`, exchanges the token for MQTT credentials at `/iot-auth/app/certification`, then
@@ -115,11 +127,22 @@ be tripped by a slow cloud API.
 **4. Prometheus scrapes on its own.** `exporter:9101` is a static target in `prometheus.yml`,
 pulled every 30 s. The alert rules in `prometheus/rules/` are loaded from the same directory.
 
-**5. Grafana provisions itself.** On startup it reads `grafana/provisioning/`, creates the
-Prometheus datasource under the pinned uid `ecoflow-prometheus`, and loads every dashboard in
-`grafana/dashboards/`. Deleting the Grafana volume changes nothing: it rebuilds both from the
-files. Dashboards are read-only in the UI on purpose — they live in git, so edit the JSON and
-Grafana picks the change up within 30 seconds without a restart.
+**5. Grafana provisions itself.** On startup it reads `/etc/grafana/provisioning`, creates the
+Prometheus datasource under the pinned uid `ecoflow-prometheus`, and loads every dashboard from
+`/etc/grafana/dashboards`. Both are baked into the image from `grafana/` in this repository.
+Deleting the Grafana volume changes nothing: it rebuilds both from those files.
+
+Dashboards live outside `/var/lib/grafana` on purpose. That path is the named volume, and a
+populated volume shadows the image beneath it — dashboards provisioned from there would silently
+freeze at whatever version first created the volume, and an upgrade would appear to do nothing.
+
+Dashboards are read-only in the UI by design: they live in git. To edit one, use the contributor
+overlay, which bind-mounts `grafana/` back over the image so Grafana picks up your change within
+30 seconds:
+
+```bash
+docker compose -f compose.yaml -f compose.build.yaml up -d --build
+```
 
 **Freshness.** Nothing here polls a device directly. In `private` mode the station pushes partial
 deltas every couple of seconds and a complete snapshot every ~300 s, so the exporter's picture
@@ -225,14 +248,18 @@ pnpm run lint         # eslint with type-aware rules
 pnpm test             # node --test, 76 tests
 pnpm run check        # all three, the same gate CI applies
 
-pnpm run docker:up    # build and start exporter + Prometheus + Grafana
+pnpm run docker:up    # build all three images from this tree and start them
 pnpm run docker:down  # stop them, keeping the metric history
+pnpm run docker:pull  # run the published images instead of building
 
 pnpm run capture      # record a scrubbed NDJSON trace from your own devices
 ```
 
-`docker:up` always rebuilds. Compose happily reuses a stale image otherwise, which produces the
-worst kind of confusion: source that no longer matches the container you are looking at.
+`docker:up` layers `compose.build.yaml` over `compose.yaml`: it builds all three images from this
+working tree and mounts `prometheus/` and `grafana/` live, so config and dashboard edits apply
+without a rebuild. It always passes `--build`, because Compose otherwise reuses a stale image and
+produces the worst kind of confusion: source that no longer matches the container you are looking
+at. Plain `docker compose up -d` pulls the published images instead and never builds.
 `docker:down` leaves the named volumes alone, so Prometheus keeps its history; add `-v` by hand
 when you actually want a clean slate.
 

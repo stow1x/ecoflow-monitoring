@@ -18,8 +18,9 @@
   },
   "scripts": {
     "start": "node src/index.ts",
-    "docker:up": "docker compose up -d --build",
+    "docker:up": "docker compose -f compose.yaml -f compose.build.yaml up -d --build",
     "docker:down": "docker compose down",
+    "docker:pull": "docker compose pull && docker compose up -d",
     "test": "node --test",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
