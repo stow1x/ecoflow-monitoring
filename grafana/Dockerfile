@@ -1,4 +1,4 @@
-FROM grafana/grafana:13.2.0
+FROM grafana/grafana:13.2.1
 
 # Nothing this image needs may live under /var/lib/grafana: that path is the grafana_data named
 # volume, and a populated volume shadows whatever the image has beneath it, so the files would
