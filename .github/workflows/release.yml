@@ -28,15 +28,83 @@ jobs:
       - uses: googleapis/release-please-action@v4
         id: release
         with:
+          # GITHUB_TOKEN cannot trigger other workflows, so a release PR it opens receives no
+          # status checks and a required-checks ruleset blocks it forever. A PAT in
+          # RELEASE_PLEASE_TOKEN makes the PR trigger CI like any other. Falls back to
+          # GITHUB_TOKEN so the workflow still runs before the secret is configured.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
+  assets:
+    name: quick-start assets
+    needs: release-please
+    if: needs.release-please.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag }}
+      # The README points users at releases/latest/download rather than at main: a compose file
+      # served from main can reference image tags that do not exist yet.
+      # GitHub rejects asset names beginning with a dot and silently renames .env.example to
+      # default.env.example, which 404s the documented download URL. Upload under an explicit
+      # dot-free name instead.
+      - run: |
+          cp .env.example env.example
+          gh release upload "$TAG" compose.yaml env.example --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.release-please.outputs.tag }}
+
+  pull-smoke:
+    name: published images pull anonymously
+    needs: [release-please, image]
+    runs-on: ubuntu-latest
+    steps:
+      # Newly created GHCR packages default to PRIVATE, and the resulting pull error is `denied`,
+      # which reads as a login problem and sends users to `docker login`. Fail the release loudly
+      # instead, so a forgotten visibility flip cannot ship silently.
+      - name: Anonymous pull of all three images
+        run: |
+          docker logout ghcr.io || true
+          fail=0
+          for repo in "" /prometheus /grafana; do
+            img="ghcr.io/${{ github.repository }}${repo}:${{ needs.release-please.outputs.version }}"
+            if docker manifest inspect "$img" >/dev/null 2>&1; then
+              echo "ok        $img"
+            else
+              echo "NOT PUBLIC $img"
+              fail=1
+            fi
+          done
+          test "$fail" -eq 0 || {
+            echo
+            echo "Make the package public: GitHub -> Packages -> <package> -> Package settings"
+            echo "-> Change visibility -> Public. There is no API for this."
+            exit 1; }
+
   edge:
-    name: edge image
+    name: edge image (${{ matrix.image }})
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: exporter
+            context: .
+            suffix: ""
+          - image: prometheus
+            context: ./prometheus
+            suffix: /prometheus
+          - image: grafana
+            context: ./grafana
+            suffix: /grafana
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
@@ -48,24 +116,38 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ${{ matrix.context }}
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/${{ github.repository }}:edge
+          provenance: false
+          tags: ghcr.io/${{ github.repository }}${{ matrix.suffix }}:edge
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
 
   image:
-    name: release image
+    name: release image (${{ matrix.image }})
     needs: release-please
     if: needs.release-please.outputs.released == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: exporter
+            context: .
+            suffix: ""
+          - image: prometheus
+            context: ./prometheus
+            suffix: /prometheus
+          - image: grafana
+            context: ./grafana
+            suffix: /grafana
     steps:
       - uses: actions/checkout@v4
         with:
@@ -79,17 +161,18 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ${{ matrix.context }}
           platforms: linux/amd64,linux/arm64
           push: true
+          provenance: false
           tags: |
-            ghcr.io/${{ github.repository }}:${{ needs.release-please.outputs.version }}
-            ghcr.io/${{ github.repository }}:${{ needs.release-please.outputs.major }}.${{ needs.release-please.outputs.minor }}
-            ghcr.io/${{ github.repository }}:${{ needs.release-please.outputs.major }}
-            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}${{ matrix.suffix }}:${{ needs.release-please.outputs.version }}
+            ghcr.io/${{ github.repository }}${{ matrix.suffix }}:${{ needs.release-please.outputs.major }}.${{ needs.release-please.outputs.minor }}
+            ghcr.io/${{ github.repository }}${{ matrix.suffix }}:${{ needs.release-please.outputs.major }}
+            ghcr.io/${{ github.repository }}${{ matrix.suffix }}:latest
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.version=${{ needs.release-please.outputs.version }}
             org.opencontainers.image.revision=${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}

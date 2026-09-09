@@ -1,9 +1,15 @@
 name: ecoflow-monitoring
 
+# Everything this stack needs is inside the three published images, so this file plus a filled-in
+# .env is the whole install -- no clone, no build. Contributors who want to build from source or
+# edit dashboards live add compose.build.yaml on top; see CONTRIBUTING.md.
+#
+# A fork's CI publishes to its own namespace, so the registry prefix is overridable: set
+# ECOFLOW_IMAGE=ghcr.io/<your-account>/ecoflow-monitoring in .env to run your own images.
+
 services:
   exporter:
-    build: .
-    image: ecoflow-monitoring:local
+    image: ${ECOFLOW_IMAGE:-ghcr.io/stow1x/ecoflow-monitoring}:${ECOFLOW_TAG:-latest}
     environment:
       ECOFLOW_MODE: ${ECOFLOW_MODE:-private}
       ECOFLOW_EMAIL: ${ECOFLOW_EMAIL:-}
@@ -45,14 +51,13 @@ services:
     #   - ./raw:/data/raw
 
   prometheus:
-    image: prom/prometheus:v3.14.0
+    image: ${ECOFLOW_IMAGE:-ghcr.io/stow1x/ecoflow-monitoring}/prometheus:${ECOFLOW_TAG:-latest}
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
       - --storage.tsdb.retention.time=365d
       - --web.enable-lifecycle
     volumes:
-      - ./prometheus:/etc/prometheus:ro
       - prometheus_data:/prometheus
     expose:
       - "9090"
@@ -74,7 +79,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:13.2.0
+    image: ${ECOFLOW_IMAGE:-ghcr.io/stow1x/ecoflow-monitoring}/grafana:${ECOFLOW_TAG:-latest}
     ports:
       - "3000:3000"
     environment:
@@ -83,8 +88,6 @@ services:
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_FEATURE_TOGGLES_DASHBOARDNEWLAYOUTS: "false"
     volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
       - grafana_data:/var/lib/grafana
     depends_on:
       prometheus:

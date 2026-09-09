@@ -8,12 +8,16 @@ Prometheus exporter and a ready-to-run Grafana stack for EcoFlow power stations.
 [![licence](https://img.shields.io/github/license/stow1x/ecoflow-monitoring)](LICENSE)
 
 One container polls or streams telemetry from your stations, exposes it as curated Prometheus
-metrics, and a provisioned Grafana dashboard plots it. `docker compose up` is the whole install.
+metrics, and a provisioned Grafana dashboard plots it. Two files are the whole install — the
+scrape config, alert rules, datasource and dashboard are baked into the published images.
 
 Verified end to end against a **DELTA 3 1500** and a **RIVER 2** on the EU cloud.
 
-```
-docker compose up -d      # exporter + Prometheus + Grafana
+```bash
+curl -LO https://github.com/stow1x/ecoflow-monitoring/releases/latest/download/compose.yaml
+curl -Lo .env https://github.com/stow1x/ecoflow-monitoring/releases/latest/download/env.example
+# fill in GRAFANA_PASSWORD and your EcoFlow credentials, then:
+docker compose up -d
 open http://localhost:3000
 ```
 
@@ -65,18 +69,37 @@ ECOFLOW_SERIALS=D361ZEXXXXXXXXXX,R601ZCXXXXXXXXXX
 
 ## Quick start
 
+Two files, no clone, no build — the Prometheus scrape config, the alert rules, the datasource and
+the dashboard are baked into the published images:
+
 ```bash
-git clone https://github.com/stow1x/ecoflow-monitoring
-cd ecoflow-monitoring
-cp .env.example .env
-$EDITOR .env
+curl -LO https://github.com/stow1x/ecoflow-monitoring/releases/latest/download/compose.yaml
+curl -Lo .env https://github.com/stow1x/ecoflow-monitoring/releases/latest/download/env.example
+${EDITOR:-nano} .env      # GRAFANA_PASSWORD is required; compose refuses to start without it
 docker compose up -d
 ```
+
+These come from the latest release rather than from `main`, because a compose file taken from
+`main` can reference image tags that have not been published yet.
 
 Grafana is on <http://localhost:3000> (`admin` / `GRAFANA_PASSWORD`), with the **EcoFlow Overview**
 dashboard already provisioned. Prometheus is not published on the host; reach it through Grafana.
 
-Running without Docker needs Node 24, which executes the TypeScript sources directly:
+All three images are published to ghcr.io as public packages, so no `docker login` is needed. If a
+pull ever fails with `denied`, that is a package-visibility problem on the publisher's side, not
+your credentials — the release pipeline asserts anonymous pull, so it should not happen.
+
+`latest` is the default. Pin a release with `ECOFLOW_TAG=0.2.0` in `.env`, or track the tip of
+`main` with `ECOFLOW_TAG=edge`.
+
+To upgrade, pull and recreate:
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+From a clone of the repository, running the exporter without Docker needs Node 24, which executes
+the TypeScript sources directly:
 
 ```bash
 pnpm install
@@ -88,10 +111,89 @@ There is nothing to click afterwards. Filling in `.env` is the only manual step 
 install; see [How it works](#how-it-works) for what the three containers arrange between
 themselves at startup.
 
+## Changing the config without a clone
+
+Baking the configuration into the images costs the ability to edit it in place, so here is the
+supported way back for a pull-only install. Compose merges service volumes **by target path**
+rather than replacing the list, so a bind mount added in an override sits alongside the named
+data volume instead of displacing it.
+
+Take Prometheus' scrape interval. Extract the file the image ships, edit it, and mount your copy
+over that one path:
+
+```bash
+docker run --rm --entrypoint cat \
+  ghcr.io/stow1x/ecoflow-monitoring/prometheus:latest \
+  /etc/prometheus/prometheus.yml > prometheus.yml
+
+$EDITOR prometheus.yml
+
+cat > compose.override.yaml <<'EOF'
+services:
+  prometheus:
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+EOF
+
+docker compose up -d
+```
+
+Compose auto-loads `compose.override.yaml` from the same directory, so no `-f` is needed — and
+none should be added, because naming files explicitly disables that auto-loading.
+
+Prometheus does not watch the file, but `--web.enable-lifecycle` is on, so later edits need only
+a reload rather than a restart:
+
+```bash
+docker compose exec prometheus wget -qO- --post-data= http://127.0.0.1:9090/-/reload
+```
+
+The same shape works for a dashboard, with one difference: mounting a **directory** replaces it
+wholesale, so copy out what the image ships before pointing at your own copy, or you will lose the
+provisioned dashboard rather than extend it.
+
+```bash
+mkdir dashboards
+docker run --rm --entrypoint cat \
+  ghcr.io/stow1x/ecoflow-monitoring/grafana:latest \
+  /etc/grafana/dashboards/ecoflow-overview.json > dashboards/ecoflow-overview.json
+```
+
+then add to the same override:
+
+```yaml
+  grafana:
+    volumes:
+      - ./dashboards:/etc/grafana/dashboards:ro
+```
+
+Grafana re-reads provisioned dashboards every 30 s, so edits there apply without a restart.
+
+Keep in mind that a mounted file no longer moves with the image tag: pinning your own copy means
+upgrades stop delivering changes to it, which is the trade you are making for editability.
+
+## Forking it
+
+The workflows are namespace-agnostic: `release.yml` publishes to `ghcr.io/${{ github.repository }}`,
+so a fork's CI pushes all three images to the fork's own account without any edit. Point the stack
+at them with one line in `.env`:
+
+```dotenv
+ECOFLOW_IMAGE=ghcr.io/your-account/ecoflow-monitoring
+```
+
+Package visibility is inherited from the repository on first publish — a public fork gets public
+packages that pull anonymously, a private fork gets private ones needing `docker login`.
+
+Releases are cut by release-please. If your fork protects its default branch with required status
+checks, add a `RELEASE_PLEASE_TOKEN` secret (a PAT with Contents and Pull requests write): GitHub
+does not trigger workflows for refs pushed with `GITHUB_TOKEN`, so without it the release PR
+receives no checks and can never merge. Nothing else in CI needs a secret.
+
 ## How it works
 
-`docker compose up -d` starts three containers, and everything they need is in the repository, so
-no dashboard gets imported by hand and no scrape target gets registered in a UI.
+`docker compose up -d` starts three containers, and everything they need is baked into their
+images, so no dashboard gets imported by hand and no scrape target gets registered in a UI.
 
 **1. The exporter authenticates and subscribes.** In `private` mode it posts your credentials to
 `/auth/login`, exchanges the token for MQTT credentials at `/iot-auth/app/certification`, then
@@ -113,13 +215,25 @@ in-memory read, so a scrape never waits on EcoFlow, and Prometheus' 10 s scrape 
 be tripped by a slow cloud API.
 
 **4. Prometheus scrapes on its own.** `exporter:9101` is a static target in `prometheus.yml`,
-pulled every 30 s. The alert rules in `prometheus/rules/` are loaded from the same directory.
+pulled every 30 s. The alert rules are loaded from `/etc/prometheus/rules`, baked into the image
+from `prometheus/rules/` in this repository.
 
-**5. Grafana provisions itself.** On startup it reads `grafana/provisioning/`, creates the
-Prometheus datasource under the pinned uid `ecoflow-prometheus`, and loads every dashboard in
-`grafana/dashboards/`. Deleting the Grafana volume changes nothing: it rebuilds both from the
-files. Dashboards are read-only in the UI on purpose — they live in git, so edit the JSON and
-Grafana picks the change up within 30 seconds without a restart.
+**5. Grafana provisions itself.** On startup it reads `/etc/grafana/provisioning`, creates the
+Prometheus datasource under the pinned uid `ecoflow-prometheus`, and loads every dashboard from
+`/etc/grafana/dashboards`. Both are baked into the image from `grafana/` in this repository.
+Deleting the Grafana volume changes nothing: it rebuilds both from those files.
+
+Dashboards live outside `/var/lib/grafana` on purpose. That path is the named volume, and a
+populated volume shadows the image beneath it — dashboards provisioned from there would silently
+freeze at whatever version first created the volume, and an upgrade would appear to do nothing.
+
+Dashboards are read-only in the UI by design: they live in git. To edit one, use the contributor
+overlay, which bind-mounts `grafana/` back over the image so Grafana picks up your change within
+30 seconds:
+
+```bash
+docker compose -f compose.yaml -f compose.build.yaml up -d --build
+```
 
 **Freshness.** Nothing here polls a device directly. In `private` mode the station pushes partial
 deltas every couple of seconds and a complete snapshot every ~300 s, so the exporter's picture
@@ -225,14 +339,22 @@ pnpm run lint         # eslint with type-aware rules
 pnpm test             # node --test, 76 tests
 pnpm run check        # all three, the same gate CI applies
 
-pnpm run docker:up    # build and start exporter + Prometheus + Grafana
+pnpm run docker:up    # build all three images from this tree and start them
 pnpm run docker:down  # stop them, keeping the metric history
+pnpm run docker:pull  # run the published images instead of building
 
 pnpm run capture      # record a scrubbed NDJSON trace from your own devices
 ```
 
-`docker:up` always rebuilds. Compose happily reuses a stale image otherwise, which produces the
-worst kind of confusion: source that no longer matches the container you are looking at.
+`docker:up` layers `compose.build.yaml` over `compose.yaml`: it builds all three images from this
+working tree and mounts `prometheus/` and `grafana/` live, so config and dashboard edits apply
+without a rebuild. It always passes `--build`, because Compose otherwise reuses a stale image and
+produces the worst kind of confusion: source that no longer matches the container you are looking
+at. Plain `docker compose up -d` pulls the published images instead and never builds.
+
+Because `docker:up` names its files with `-f`, Compose stops auto-loading `compose.override.yaml`.
+On a deployment that relies on such an override, use plain `docker compose up -d` — or pass the
+override as a third `-f`.
 `docker:down` leaves the named volumes alone, so Prometheus keeps its history; add `-v` by hand
 when you actually want a clean slate.
 
