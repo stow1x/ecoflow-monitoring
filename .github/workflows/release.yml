@@ -49,7 +49,12 @@ jobs:
           ref: ${{ needs.release-please.outputs.tag }}
       # The README points users at releases/latest/download rather than at main: a compose file
       # served from main can reference image tags that do not exist yet.
-      - run: gh release upload "$TAG" compose.yaml .env.example --clobber
+      # GitHub rejects asset names beginning with a dot and silently renames .env.example to
+      # default.env.example, which 404s the documented download URL. Upload under an explicit
+      # dot-free name instead.
+      - run: |
+          cp .env.example env.example
+          gh release upload "$TAG" compose.yaml env.example --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.release-please.outputs.tag }}

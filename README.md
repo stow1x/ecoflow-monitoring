@@ -15,7 +15,7 @@ Verified end to end against a **DELTA 3 1500** and a **RIVER 2** on the EU cloud
 
 ```bash
 curl -LO https://github.com/stow1x/ecoflow-monitoring/releases/latest/download/compose.yaml
-curl -Lo .env https://github.com/stow1x/ecoflow-monitoring/releases/latest/download/.env.example
+curl -Lo .env https://github.com/stow1x/ecoflow-monitoring/releases/latest/download/env.example
 # fill in GRAFANA_PASSWORD and your EcoFlow credentials, then:
 docker compose up -d
 open http://localhost:3000
@@ -74,7 +74,7 @@ the dashboard are baked into the published images:
 
 ```bash
 curl -LO https://github.com/stow1x/ecoflow-monitoring/releases/latest/download/compose.yaml
-curl -Lo .env https://github.com/stow1x/ecoflow-monitoring/releases/latest/download/.env.example
+curl -Lo .env https://github.com/stow1x/ecoflow-monitoring/releases/latest/download/env.example
 ${EDITOR:-nano} .env      # GRAFANA_PASSWORD is required; compose refuses to start without it
 docker compose up -d
 ```
