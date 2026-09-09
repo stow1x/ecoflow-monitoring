@@ -14,12 +14,13 @@ services:
     build: .
     image: ecoflow-monitoring:local
 
+  # Compose merges service volumes by target path rather than replacing the list, so the base
+  # file's named volumes (prometheus_data, grafana_data) carry over without being repeated here.
   prometheus:
     build: ./prometheus
     image: ecoflow-monitoring-prometheus:local
     volumes:
       - ./prometheus:/etc/prometheus:ro
-      - prometheus_data:/prometheus
 
   grafana:
     build: ./grafana
@@ -27,4 +28,3 @@ services:
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/etc/grafana/dashboards:ro
-      - grafana_data:/var/lib/grafana

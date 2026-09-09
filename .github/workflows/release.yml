@@ -31,6 +31,51 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
+  assets:
+    name: quick-start assets
+    needs: release-please
+    if: needs.release-please.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag }}
+      # The README points users at releases/latest/download rather than at main: a compose file
+      # served from main can reference image tags that do not exist yet.
+      - run: gh release upload "$TAG" compose.yaml .env.example --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.release-please.outputs.tag }}
+
+  pull-smoke:
+    name: published images pull anonymously
+    needs: [release-please, image]
+    runs-on: ubuntu-latest
+    steps:
+      # Newly created GHCR packages default to PRIVATE, and the resulting pull error is `denied`,
+      # which reads as a login problem and sends users to `docker login`. Fail the release loudly
+      # instead, so a forgotten visibility flip cannot ship silently.
+      - name: Anonymous pull of all three images
+        run: |
+          docker logout ghcr.io || true
+          fail=0
+          for repo in "" /prometheus /grafana; do
+            img="ghcr.io/${{ github.repository }}${repo}:${{ needs.release-please.outputs.version }}"
+            if docker manifest inspect "$img" >/dev/null 2>&1; then
+              echo "ok        $img"
+            else
+              echo "NOT PUBLIC $img"
+              fail=1
+            fi
+          done
+          test "$fail" -eq 0 || {
+            echo
+            echo "Make the package public: GitHub -> Packages -> <package> -> Package settings"
+            echo "-> Change visibility -> Public. There is no API for this."
+            exit 1; }
+
   edge:
     name: edge image (${{ matrix.image }})
     runs-on: ubuntu-latest

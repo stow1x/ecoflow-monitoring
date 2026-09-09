@@ -8,12 +8,16 @@ Prometheus exporter and a ready-to-run Grafana stack for EcoFlow power stations.
 [![licence](https://img.shields.io/github/license/stow1x/ecoflow-monitoring)](LICENSE)
 
 One container polls or streams telemetry from your stations, exposes it as curated Prometheus
-metrics, and a provisioned Grafana dashboard plots it. `docker compose up` is the whole install.
+metrics, and a provisioned Grafana dashboard plots it. Two files are the whole install — the
+scrape config, alert rules, datasource and dashboard are baked into the published images.
 
 Verified end to end against a **DELTA 3 1500** and a **RIVER 2** on the EU cloud.
 
-```
-docker compose up -d      # exporter + Prometheus + Grafana
+```bash
+curl -LO https://github.com/stow1x/ecoflow-monitoring/releases/latest/download/compose.yaml
+curl -Lo .env https://github.com/stow1x/ecoflow-monitoring/releases/latest/download/.env.example
+# fill in GRAFANA_PASSWORD and your EcoFlow credentials, then:
+docker compose up -d
 open http://localhost:3000
 ```
 
@@ -69,18 +73,24 @@ Two files, no clone, no build — the Prometheus scrape config, the alert rules,
 the dashboard are baked into the published images:
 
 ```bash
-curl -O https://raw.githubusercontent.com/stow1x/ecoflow-monitoring/main/compose.yaml
-curl -o .env https://raw.githubusercontent.com/stow1x/ecoflow-monitoring/main/.env.example
-$EDITOR .env
+curl -LO https://github.com/stow1x/ecoflow-monitoring/releases/latest/download/compose.yaml
+curl -Lo .env https://github.com/stow1x/ecoflow-monitoring/releases/latest/download/.env.example
+${EDITOR:-nano} .env      # GRAFANA_PASSWORD is required; compose refuses to start without it
 docker compose up -d
 ```
+
+These come from the latest release rather than from `main`, because a compose file taken from
+`main` can reference image tags that have not been published yet.
 
 Grafana is on <http://localhost:3000> (`admin` / `GRAFANA_PASSWORD`), with the **EcoFlow Overview**
 dashboard already provisioned. Prometheus is not published on the host; reach it through Grafana.
 
-The images are public on ghcr.io and pull anonymously, so no registry login is needed. `latest` is
-the default; pin a release with `ECOFLOW_TAG=0.2.0` in `.env`, or track the tip of `main` with
-`ECOFLOW_TAG=edge`.
+All three images are published to ghcr.io as public packages, so no `docker login` is needed. If a
+pull ever fails with `denied`, that is a package-visibility problem on the publisher's side, not
+your credentials — the release pipeline asserts anonymous pull, so it should not happen.
+
+`latest` is the default. Pin a release with `ECOFLOW_TAG=0.2.0` in `.env`, or track the tip of
+`main` with `ECOFLOW_TAG=edge`.
 
 To upgrade, pull and recreate:
 
@@ -88,7 +98,8 @@ To upgrade, pull and recreate:
 docker compose pull && docker compose up -d
 ```
 
-Running without Docker needs Node 24, which executes the TypeScript sources directly:
+From a clone of the repository, running the exporter without Docker needs Node 24, which executes
+the TypeScript sources directly:
 
 ```bash
 pnpm install
@@ -125,7 +136,8 @@ in-memory read, so a scrape never waits on EcoFlow, and Prometheus' 10 s scrape 
 be tripped by a slow cloud API.
 
 **4. Prometheus scrapes on its own.** `exporter:9101` is a static target in `prometheus.yml`,
-pulled every 30 s. The alert rules in `prometheus/rules/` are loaded from the same directory.
+pulled every 30 s. The alert rules are loaded from `/etc/prometheus/rules`, baked into the image
+from `prometheus/rules/` in this repository.
 
 **5. Grafana provisions itself.** On startup it reads `/etc/grafana/provisioning`, creates the
 Prometheus datasource under the pinned uid `ecoflow-prometheus`, and loads every dashboard from
@@ -260,6 +272,10 @@ working tree and mounts `prometheus/` and `grafana/` live, so config and dashboa
 without a rebuild. It always passes `--build`, because Compose otherwise reuses a stale image and
 produces the worst kind of confusion: source that no longer matches the container you are looking
 at. Plain `docker compose up -d` pulls the published images instead and never builds.
+
+Because `docker:up` names its files with `-f`, Compose stops auto-loading `compose.override.yaml`.
+On a deployment that relies on such an override, use plain `docker compose up -d` — or pass the
+override as a third `-f`.
 `docker:down` leaves the named volumes alone, so Prometheus keeps its history; add `-v` by hand
 when you actually want a clean slate.
 

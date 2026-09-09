@@ -29,6 +29,14 @@ pnpm run docker:down    # stop them, keeping the metric history
 pnpm run docker:pull    # run the published images instead of building
 ```
 
+Two things worth knowing:
+
+- Plain `docker compose up -d` **pulls** and never builds — `compose.yaml` has no `build:`. Use
+  `docker:up` (which layers `compose.build.yaml`) when you want your working tree in the image.
+- `docker:up` passes `-f`, and naming files explicitly **disables Compose's automatic loading of
+  `compose.override.yaml`**. If you keep a deployment-local override, invoke plain
+  `docker compose up -d` instead, or pass your override as a third `-f`.
+
 ## Pull requests
 
 **The PR title must be a [Conventional Commit](https://www.conventionalcommits.org/).** It becomes

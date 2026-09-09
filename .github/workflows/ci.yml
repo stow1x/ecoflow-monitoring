@@ -81,13 +81,29 @@ jobs:
       - name: Dashboards are not under the grafana_data volume path
         run: |
           # /var/lib/grafana is a named volume at runtime; anything provisioned from there is
-          # shadowed by the populated volume on every later image update.
+          # shadowed by the populated volume on every later image update. Read the YAML key
+          # rather than grepping for a path substring, and fail when it cannot be read at all --
+          # an empty result must not pass as "not under the volume".
           path=$(docker run --rm --entrypoint sh ecoflow-monitoring-grafana:ci \
-            -c "grep -oE '/[^ ]*dashboards' /etc/grafana/provisioning/dashboards/ecoflow.yml | tail -1")
+            -c "sed -n 's/^[[:space:]]*path:[[:space:]]*//p' /etc/grafana/provisioning/dashboards/ecoflow.yml")
+          test -n "$path" || { echo "could not read the provisioned dashboard path"; exit 1; }
           echo "provisioned dashboard path: $path"
           case "$path" in
-            /var/lib/grafana/*) echo "dashboards would be shadowed by the volume"; exit 1 ;;
+            /var/lib/grafana|/var/lib/grafana/*)
+              echo "dashboards would be shadowed by the grafana_data volume"; exit 1 ;;
           esac
+          docker run --rm --entrypoint sh ecoflow-monitoring-grafana:ci -c "ls -1 '$path'/*.json >/dev/null"
+
+      - name: Nothing either image needs lives under a volume mountpoint
+        run: |
+          # The general form of the bug above: /var/lib/grafana and /prometheus are both named
+          # volumes, so any file baked beneath them is frozen at whatever first seeded the volume.
+          docker run --rm --entrypoint sh ecoflow-monitoring-grafana:ci \
+            -c 'test -z "$(find /var/lib/grafana -type f)"' \
+            || { echo "image content under /var/lib/grafana will be shadowed"; exit 1; }
+          docker run --rm --entrypoint sh ecoflow-monitoring-prometheus:ci \
+            -c 'test -z "$(find /prometheus -type f)"' \
+            || { echo "image content under /prometheus will be shadowed"; exit 1; }
 
   stack:
     name: prometheus and grafana config
@@ -103,6 +119,10 @@ jobs:
             "https://github.com/prometheus/prometheus/releases/download/v${PROMETHEUS_VERSION}/${tarball}.tar.gz"
           tar -xzf promtool.tar.gz "${tarball}/promtool"
           sudo install -m 0755 "${tarball}/promtool" /usr/local/bin/promtool
+      - name: promtool version matches the image base
+        run: |
+          grep -qx "FROM prom/prometheus:v${PROMETHEUS_VERSION}" prometheus/Dockerfile \
+            || { echo "PROMETHEUS_VERSION drifted from prometheus/Dockerfile"; exit 1; }
       - run: promtool check config prometheus/prometheus.yml
       - run: promtool check rules prometheus/rules/*.yml
       - name: Dashboard JSON parses
@@ -113,14 +133,21 @@ jobs:
           docker compose -f compose.yaml -f compose.build.yaml config -q
         env:
           GRAFANA_PASSWORD: ci
-      - name: compose.yaml is self-contained (no build, no config bind mounts)
+      - name: compose.yaml is self-contained (no build, no bind mounts)
         run: |
           # The published compose.yaml is the whole install: a user curls it and runs it, with no
-          # clone. A build: directive or a ./ bind mount silently reintroduces that requirement.
+          # clone. A build: directive or any bind mount silently reintroduces that requirement.
+          # Assert on mount TYPE, not on path spelling: `docker compose config` renders a relative
+          # source as an absolute path, so a pattern matching "prometheus/" never fires.
           config=$(docker compose config)
-          echo "$config" | grep -q 'build:' && { echo "compose.yaml must not build"; exit 1; }
-          echo "$config" | grep -E 'source: */.*(prometheus|grafana)/' && {
-            echo "compose.yaml must not bind-mount repository config"; exit 1; }
+          if printf '%s\n' "$config" | grep -q 'build:'; then
+            echo "compose.yaml must not build"; exit 1
+          fi
+          if printf '%s\n' "$config" | grep -q 'type: bind'; then
+            echo "compose.yaml must not bind-mount anything from the working tree"
+            printf '%s\n' "$config" | grep -B2 -A2 'type: bind'
+            exit 1
+          fi
           echo "self-contained: ok"
         env:
           GRAFANA_PASSWORD: ci
