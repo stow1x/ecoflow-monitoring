@@ -111,6 +111,67 @@ There is nothing to click afterwards. Filling in `.env` is the only manual step 
 install; see [How it works](#how-it-works) for what the three containers arrange between
 themselves at startup.
 
+## Changing the config without a clone
+
+Baking the configuration into the images costs the ability to edit it in place, so here is the
+supported way back for a pull-only install. Compose merges service volumes **by target path**
+rather than replacing the list, so a bind mount added in an override sits alongside the named
+data volume instead of displacing it.
+
+Take Prometheus' scrape interval. Extract the file the image ships, edit it, and mount your copy
+over that one path:
+
+```bash
+docker run --rm --entrypoint cat \
+  ghcr.io/stow1x/ecoflow-monitoring/prometheus:latest \
+  /etc/prometheus/prometheus.yml > prometheus.yml
+
+$EDITOR prometheus.yml
+
+cat > compose.override.yaml <<'EOF'
+services:
+  prometheus:
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+EOF
+
+docker compose up -d
+```
+
+Compose auto-loads `compose.override.yaml` from the same directory, so no `-f` is needed — and
+none should be added, because naming files explicitly disables that auto-loading.
+
+Prometheus does not watch the file, but `--web.enable-lifecycle` is on, so later edits need only
+a reload rather than a restart:
+
+```bash
+docker compose exec prometheus wget -qO- --post-data= http://127.0.0.1:9090/-/reload
+```
+
+The same shape works for a dashboard, with one difference: mounting a **directory** replaces it
+wholesale, so copy out what the image ships before pointing at your own copy, or you will lose the
+provisioned dashboard rather than extend it.
+
+```bash
+mkdir dashboards
+docker run --rm --entrypoint cat \
+  ghcr.io/stow1x/ecoflow-monitoring/grafana:latest \
+  /etc/grafana/dashboards/ecoflow-overview.json > dashboards/ecoflow-overview.json
+```
+
+then add to the same override:
+
+```yaml
+  grafana:
+    volumes:
+      - ./dashboards:/etc/grafana/dashboards:ro
+```
+
+Grafana re-reads provisioned dashboards every 30 s, so edits there apply without a restart.
+
+Keep in mind that a mounted file no longer moves with the image tag: pinning your own copy means
+upgrades stop delivering changes to it, which is the trade you are making for editability.
+
 ## Forking it
 
 The workflows are namespace-agnostic: `release.yml` publishes to `ghcr.io/${{ github.repository }}`,
