@@ -1,0 +1,30 @@
+# Contributor overlay: build the three images from this working tree instead of pulling them,
+# and mount the Prometheus and Grafana configuration live so edits apply without a rebuild.
+#
+#   docker compose -f compose.yaml -f compose.build.yaml up -d --build
+#
+# Grafana re-reads provisioned dashboards every 30s, so editing
+# grafana/dashboards/ecoflow-overview.json shows up without restarting anything. Prometheus needs
+# a reload to pick up prometheus.yml or a rule change:
+#
+#   docker compose exec prometheus wget -qO- --post-data= http://127.0.0.1:9090/-/reload
+
+services:
+  exporter:
+    build: .
+    image: ecoflow-monitoring:local
+
+  # Compose merges service volumes by target path rather than replacing the list, so the base
+  # file's named volumes (prometheus_data, grafana_data) carry over without being repeated here.
+  prometheus:
+    build: ./prometheus
+    image: ecoflow-monitoring-prometheus:local
+    volumes:
+      - ./prometheus:/etc/prometheus:ro
+
+  grafana:
+    build: ./grafana
+    image: ecoflow-monitoring-grafana:local
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro

@@ -26,7 +26,10 @@ updates:
       prefix: "ci"
 
   - package-ecosystem: docker
-    directory: /
+    directories:
+      - /
+      - /prometheus
+      - /grafana
     schedule:
       interval: weekly
     commit-message:

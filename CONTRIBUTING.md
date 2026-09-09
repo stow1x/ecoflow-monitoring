@@ -24,9 +24,18 @@ curl localhost:9101/metrics
 Or the whole stack, including Prometheus and Grafana:
 
 ```bash
-pnpm run docker:up      # docker compose up -d --build
-pnpm run docker:down    # docker compose down
+pnpm run docker:up      # build all three images from this tree, mount config live
+pnpm run docker:down    # stop them, keeping the metric history
+pnpm run docker:pull    # run the published images instead of building
 ```
+
+Two things worth knowing:
+
+- Plain `docker compose up -d` **pulls** and never builds — `compose.yaml` has no `build:`. Use
+  `docker:up` (which layers `compose.build.yaml`) when you want your working tree in the image.
+- `docker:up` passes `-f`, and naming files explicitly **disables Compose's automatic loading of
+  `compose.override.yaml`**. If you keep a deployment-local override, invoke plain
+  `docker compose up -d` instead, or pass your override as a third `-f`.
 
 ## Pull requests
 
