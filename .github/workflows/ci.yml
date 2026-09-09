@@ -36,8 +36,8 @@ jobs:
           push: false
           load: true
           tags: ecoflow-monitoring:ci
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=exporter
+          cache-to: type=gha,mode=max,scope=exporter
       - name: Exporter refuses to start without configuration
         run: |
           set +e
@@ -46,6 +46,48 @@ jobs:
           echo "$output"
           test "$status" -eq 78 || { echo "expected exit 78, got $status"; exit 1; }
           echo "$output" | grep -q ECOFLOW_EMAIL || { echo "missing credential diagnostics"; exit 1; }
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./prometheus
+          push: false
+          load: true
+          tags: ecoflow-monitoring-prometheus:ci
+          cache-from: type=gha,scope=prometheus
+          cache-to: type=gha,mode=max,scope=prometheus
+      - name: Baked Prometheus image carries the config and rules
+        run: |
+          docker run --rm --entrypoint promtool ecoflow-monitoring-prometheus:ci \
+            check config /etc/prometheus/prometheus.yml
+          docker run --rm --entrypoint sh ecoflow-monitoring-prometheus:ci \
+            -c 'promtool check rules /etc/prometheus/rules/*.yml'
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./grafana
+          push: false
+          load: true
+          tags: ecoflow-monitoring-grafana:ci
+          cache-from: type=gha,scope=grafana
+          cache-to: type=gha,mode=max,scope=grafana
+      - name: Baked Grafana image carries provisioning and dashboards
+        run: |
+          docker run --rm --entrypoint sh ecoflow-monitoring-grafana:ci -c '
+            set -e
+            test -f /etc/grafana/provisioning/datasources/prometheus.yml
+            test -f /etc/grafana/provisioning/dashboards/ecoflow.yml
+            test -f /etc/grafana/dashboards/ecoflow-overview.json
+          '
+      - name: Dashboards are not under the grafana_data volume path
+        run: |
+          # /var/lib/grafana is a named volume at runtime; anything provisioned from there is
+          # shadowed by the populated volume on every later image update.
+          path=$(docker run --rm --entrypoint sh ecoflow-monitoring-grafana:ci \
+            -c "grep -oE '/[^ ]*dashboards' /etc/grafana/provisioning/dashboards/ecoflow.yml | tail -1")
+          echo "provisioned dashboard path: $path"
+          case "$path" in
+            /var/lib/grafana/*) echo "dashboards would be shadowed by the volume"; exit 1 ;;
+          esac
 
   stack:
     name: prometheus and grafana config
@@ -65,7 +107,20 @@ jobs:
       - run: promtool check rules prometheus/rules/*.yml
       - name: Dashboard JSON parses
         run: node -e "JSON.parse(require('fs').readFileSync('grafana/dashboards/ecoflow-overview.json','utf8'))"
-      - name: Compose file is valid
-        run: docker compose config -q
+      - name: Compose files are valid
+        run: |
+          docker compose config -q
+          docker compose -f compose.yaml -f compose.build.yaml config -q
+        env:
+          GRAFANA_PASSWORD: ci
+      - name: compose.yaml is self-contained (no build, no config bind mounts)
+        run: |
+          # The published compose.yaml is the whole install: a user curls it and runs it, with no
+          # clone. A build: directive or a ./ bind mount silently reintroduces that requirement.
+          config=$(docker compose config)
+          echo "$config" | grep -q 'build:' && { echo "compose.yaml must not build"; exit 1; }
+          echo "$config" | grep -E 'source: */.*(prometheus|grafana)/' && {
+            echo "compose.yaml must not bind-mount repository config"; exit 1; }
+          echo "self-contained: ok"
         env:
           GRAFANA_PASSWORD: ci
