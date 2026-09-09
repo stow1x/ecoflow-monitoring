@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.1](https://github.com/stow1x/ecoflow-monitoring/compare/v0.2.0...v0.2.1) (2026-09-09)
+
+
+### Bug fixes
+
+* publish the env template under a name GitHub will serve ([#26](https://github.com/stow1x/ecoflow-monitoring/issues/26)) ([a09629a](https://github.com/stow1x/ecoflow-monitoring/commit/a09629a79ba0ed0e08622bfd10ad4447ca8b80ed))
+
+
+### Build and packaging
+
+* bump grafana/grafana from 13.2.0 to 13.2.1 in /grafana ([#21](https://github.com/stow1x/ecoflow-monitoring/issues/21)) ([7300fa1](https://github.com/stow1x/ecoflow-monitoring/commit/7300fa128a85ccd74b2839533b4ba44e18f67012))
+
 ## [0.2.0](https://github.com/stow1x/ecoflow-monitoring/compare/v0.1.0...v0.2.0) (2026-09-09)
 
 
