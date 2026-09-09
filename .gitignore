@@ -10,3 +10,5 @@ coverage/
 *.log
 .DS_Store
 .omc/
+compose.override.yaml
+compose.override.yml
