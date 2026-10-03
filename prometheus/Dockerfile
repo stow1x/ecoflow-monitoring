@@ -1,4 +1,4 @@
-FROM prom/prometheus:v3.14.0
+FROM prom/prometheus:v3.15.0
 
 COPY prometheus.yml /etc/prometheus/prometheus.yml
 COPY rules /etc/prometheus/rules
